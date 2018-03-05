@@ -49,7 +49,7 @@ La otra forma de recolección se realizó mediante un script de Python[^6]. El s
 
 Mediante estos dos procedimientos, contamos con todos los tweets emitidos por la cuenta, desde la fecha de su creación el 15 de abril de 2016 hasta el 31 de diciembre de 2017. Son 3986 tweets en 20 meses, que mostramos a continuación:
 
-```{r}
+```{r message=FALSE}
 library(readr)
 evovar <- read_csv("evovar.csv")
 evovar
@@ -59,7 +59,7 @@ evovar
 
 Una pieza central para un análisis de texto (*text mining*) es el tokenizado. Éste consiste en poder transformar la estructura de datos de los tweets, de caracteres a palabras, para posteriormente reestructurar la tabla de tal modo que haya una sola palabra en cada fila. Utilizaremos los siguientes paquetes `string` y `stringr` para la manipulación de caracteres, `dplyr` para la manipulación de la tabla de datos, `magrittr` para el uso de *pipes* y `tidytext` para el tokenizado y el análisis de texto en general. 
 
-```{r}
+```{r message=FALSE}
 library(stringi)
 library(stringr)
 library(dplyr)
@@ -103,7 +103,7 @@ rm(freq1)
 
 Esas palabras no agregan ninguna información relevante para entender la polaridad de los *sentiments*, son "palabras vacías" que debemos filtrar. Para ello necesitamos una lista de ese tipo de palabras en español que extraeremos del paquete `stopwords`:
 
-```{r}
+```{r message=FALSE}
 library(stopwords)
 
 #crear una lista de palabras vacias en español
@@ -142,7 +142,7 @@ El análisis de sentimiento nos permite aproximarnos a la intención emocional d
 
 Los diccionarios para análisis de sentimiento en español son escasos y poco desarrollados. Después de una extensa búsqueda pudimos encontrar el diccionario [iSol](http://timm.ujaen.es/recursos/isol/) que está formado por 8135 palabras, 2.509 positivas y 5.626 negativas, dejando a un lado las palabras sentimentalmente neutras. Este diccionario a su vez está basado en otro diccionario en inglés bastante testeado como es el de [Bing Liu](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), siendo una traducción especializada y mejorada.  
 
-```{r}
+```{r message=FALSE}
 #cargamos y adecuamos el diccionario al formato requerido
 negativas <- read_csv("isol/negativas_mejorada.csv", col_names = "word") %>%
   mutate(sentiment = "negativo") 
@@ -150,7 +150,9 @@ positivas <- read_csv("isol/positivas_mejorada.csv", col_names = "word") %>%
   mutate(sentiment = "positivo")
 bingES <- bind_rows(negativas, positivas) 
 rm(negativas, positivas)
-bingES$word <- stri_trans_general(bingES$word, "Latin-ASCII") # Quitamos los acentos
+
+# Quitamos los acentos
+bingES$word <- stri_trans_general(bingES$word, "Latin-ASCII") 
 bingES
 ```
 
@@ -172,7 +174,7 @@ El diccionario clasificó el 11% de las palabras. Lo ideal es que el diccionario
 
 Al revisar el diccionario encontramos tres problemas. Primero, si bien contiene muchas palabras con clara carga sentimental, en ocasiones no contiene todas sus flexiones. Segundo, dado que es un diccionaario general, no captura algunas particularidades del discurso político del presidente, particularmene su discurso nacionalista. Tercero, existen palabras polarizadas que sirven para indicar el sentimiento frente a un producto o servicio, pero no en temas políticos. Para el primer problema añadiremos flexiones basadas ya en las palabras existentes en el diccionario, para el segundo añadiremos las palabras politizadas más utilizadas, evaluando su polaridad en un intento de un diccionario político inicial, y para el tercero retiraremos las palabras no apropiadas:
 
-```{r}
+```{r message=FALSE}
 #Añadiendo flexiones y otras palabras polarizadas
 flex_dic <- read_csv("evo_uc.csv", col_names = c("word", "sentiment"))
 flex_dic <- flex_dic %>% filter(str_detect(sentiment, "positivo|negativo"))
@@ -250,7 +252,7 @@ por_w
 
 Ahora sí, estamos listos para para realizar la clasificación de sentimientos. Gracias al tokenizado, que nos dejo una estructura de una palabra por observación y al diccionario en formato clave: valor, esta clasificación solo nos ocupará la función `inner_join` que fusiona dos tablas de datos por valores comunes:
 
-```{r}
+```{r message=FALSE}
 evosentiment <- evovar_tf %>%
   inner_join(bingESmod)
 evosentiment
@@ -271,7 +273,7 @@ Aproximadamente un 57% de las palabras que ha utilizado Evo son negativas, mient
 
 Las palabras que más peso aportan a la positividad y negatividad son las siguientes:
 
-```{r}
+```{r message=FALSE}
 count_sent <- evosentiment %>%
   count(word, sentiment, sort = TRUE) %>%
   ungroup()
@@ -294,7 +296,7 @@ count_sent %>%
 
 Ahora crearemos un indice de sentimiento (*isent*) para ponderar la carga de positividad o negatividad en cada tweet. Para ello:  $isent(t) = s / nw$  donde el indice de sentimiento para un tweet sera la proporción entre el numero de palabras con carga emocional $s$ dividido entre el total de palabras $nw$, excluyento las palabras vacías. Crearemos un índice para cada polaridad:
 
-```{r}
+```{r message=FALSE}
 #Contamos el total de palabras negativas y positivas por tweets
 library(tidyr)
 tweets_sen <- evosentiment %>%
