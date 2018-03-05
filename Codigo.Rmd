@@ -98,7 +98,6 @@ head(freq1, n = 30) %>%
         xlab("Palabras más usadas") +
         ylab("Número") +
         theme_minimal()
-rm(freq1)
 ```
 
 Esas palabras no agregan ninguna información relevante para entender la polaridad de los *sentiments*, son "palabras vacías" que debemos filtrar. Para ello necesitamos una lista de ese tipo de palabras en español que extraeremos del paquete `stopwords`:
@@ -133,14 +132,13 @@ head(freq2, n = 30) %>%
         xlab("Palabras más usadas") +
         ylab("Número")+
         theme_minimal()
-rm(freq2)
 ```
 
 ## Análisis de datos
 
 El análisis de sentimiento nos permite aproximarnos a la intención emocional de los tweets que lanza el presidente Evo Morales. Este tipo de anålisis puede basarse en el análisis de palabras o relaciones de palabras (n-gramas) y se pueden evaluar diferentes escalas de sentimiento (binarias, ponderadas, etc.). Aquí elegimos el nivel del unigrama y la escala binaria, como una primera aproximación expedita. Ahora bien, existen diversos métodos para evaluar los *sentiments* en los textos, desde la anotación manual hasta el uso de *machine learning*, pero aquí utilizaremos el método basado en diccionario (Silge y Robinson 2017). Este método consite en utilizar un diccionario en formato *clave:valor* para evaluar cada palabra. Se considera al tweet como una combinación de palabras individuales que tienen una carga emocional y la proporción de esas palabras nos da el sentimiento general del tweet, como posteriormente reflejaremos en un indice de sentimiento.  
 
-Los diccionarios para análisis de sentimiento en español son escasos y poco desarrollados. Después de una extensa búsqueda pudimos encontrar el diccionario [iSol](http://timm.ujaen.es/recursos/isol/) que está formado por 8135 palabras, 2.509 positivas y 5.626 negativas, dejando a un lado las palabras sentimentalmente neutras. Este diccionario a su vez está basado en otro diccionario en inglés bastante testeado como es el de [Bing Liu](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), siendo una traducción especializada y mejorada.  
+Los diccionarios para análisis de sentimiento en español son escasos y poco desarrollados. Después de una extensa búsqueda pudimos encontrar el diccionario [iSol](http://timm.ujaen.es/recursos/isol/) que está formado por 8135 palabras, 2.509 positivas y 5.626 negativas, dejando a un lado las palabras emocionalmente neutras. Este diccionario a su vez está basado en otro diccionario en inglés bastante testeado como es el de [Bing Liu](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), siendo una traducción especializada y mejorada.  
 
 ```{r message=FALSE}
 #cargamos y adecuamos el diccionario al formato requerido
@@ -373,7 +371,7 @@ pop_t <- evovar_sent %>%
         arrange(desc(interact))
 head(pop_t, n = 10) 
 ```
-Aquí se puede apreciar que 8 de los 10 tweets tienen una fuerta carga emocional negativa, lo cual queda representando en sus indices de negatividad. Sólo dos de los diez tweets más populares de Evo Morales son positivos. 
+Aquí se puede apreciar que 7 de los 10 tweets tienen una fuerta carga emocional negativa, lo cual queda representando en sus indices de negatividad. Sólo tres de los diez tweets más populares de Evo Morales son positivos. 
 
 No obstante, el coeficiente de determinación (R^2^) muestra que la variación en las interacciones solo es explicada por su negatividad al 2%. Esta situación puede ser explicada por las siguientes alternativas: (a) existen otras variables en juego, como los topicos de los tweets que influyen en la interacción, por ejemplo que sean de temas nacionales o internacionales, históricos o políticos; (b), que las audiencia internacional sea más activa que la nacional o viceversa; (c) que el diccionario que usamos aún sea muy general y no capté las polaridades semanticas del discuro particular del presidente; (d) que el unigrama no sea una unidad de análisis suficiente en este caso. 
 
