@@ -7,6 +7,7 @@ output:
       toc: true
       toc_float: true
       theme: yeti
+      fig_width: 15
 ---
 
 ## Introducción 
@@ -15,11 +16,11 @@ Un elemento central en la dinámica política de cualquier país consiste en la 
 
 En abril de 2016 el presidente de Bolivia ha abierto una cuenta oficial de Twitter, con el nombre de <a href="https://twitter.com/evoespueblo">@evoespueblo</a>. Desde entonces se han realizado varios estudios descriptivos sobre su cuenta (Jordan 2017, Lopez 2017 y Trigo 2018). Nosotros aquí queremos ir un pequeño paso más allá realizando un estudio relacional sobre la construcción emocional de su discurso político, por lo que nos preguntamos ¿qué carga sentimental poseen sus tweets y cuáles logran mayor interacción? 
 
-El desplazamiento temático que hacemos consiste en ir de la supuesta racionalidad del discurso hacia su emotividad, que parece ser el factor que activa más los flujos en las redes sociodigitales. La emotividad es una dimensión de análisis más válida en la política gubernamental del país, si además tomamos en cuenta que siempre ha sido un aspecto central en la construcción discursiva de los presidentes populistas (Cossarini y García 2015). 
+El desplazamiento temático que hacemos consiste en ir de la supuesta racionalidad del discurso político hacia su emotividad, que parece ser el factor que activa más los flujos en las redes sociodigitales. La emotividad es una dimensión de análisis más válida en la política gubernamental del país, si además tomamos en cuenta que siempre ha sido un aspecto central en la construcción discursiva de los presidentes populistas (Cossarini y García 2015).
 
-El presente estudio pretende ser tanto un acercamiento preliminar al análisis del discurso político en las redes, como también un aporte inicial a la metodología de análisis de los datos textuales en la Web. Una característica central de este tipo de datos es su abundancia y su falta de estructuración, por lo que intentaremos automatizar tanto la recolección como el análisis de la información. 
+El presente estudio pretende ser tanto un acercamiento preliminar al análisis del discurso político en las redes, como también un aporte inicial a la metodología de análisis de los datos textuales en la Web. Una característica central de este tipo de datos es su abundancia y su falta de estructuración, por lo que intentaremos automatizar tanto la recolección como el análisis de la información, en un esfuerzo por utilizar "métodos digitales" (Rogers 2013) en las ciencias sociales. 
 
-Para ello utilizaremos principalmente el entorno de R, que es una herramienta de software libre bastante flexible[^1]. R incorpora una gran cantidad de paquetes complementarios creados por la comunidad de usuarios y desarrolladores. Para nuestro caso concreto, R nos permite utilizar un lenguaje de programación, conectarnos a APIs de redes sociales, transformar los datos, análizarlos estadísticamente, visualizarlos y públicar los resultados, todo de forma integral y reproducible.
+Para ello utilizaremos principalmente el entorno de R, que es una herramienta de software libre bastante flexible[^1]. R incorpora una gran cantidad de paquetes complementarios creados por su comunidad de usuarios y desarrolladores. Para nuestro caso concreto, R nos permite utilizar un lenguaje de programación, conectarnos a APIs de redes sociales, transformar los datos, análizarlos estadísticamente, visualizarlos y públicar los resultados, todo de forma integral y reproducible.
 
 ## Recolección de datos
 
@@ -47,7 +48,7 @@ write_as_csv(evovar, "evovar.csv")
 
 La otra forma de recolección se realizó mediante un script de Python[^6]. El script aprovecha la libreria [Selenium](https://pypi.python.org/pypi/selenium) para la simulación del navegador y [tweepy](https://pypi.python.org/pypi/tweepy/3.5.0) para la conexión con Twitter. De esta forma logramos conseguir los tweets antiguos adicionales, que no se podrían haber conseguido mediante la API. 
 
-Mediante estos dos procedimientos, contamos con todos los tweets emitidos por la cuenta, desde la fecha de su creación el 15 de abril de 2016 hasta el 31 de diciembre de 2017. Son 3986 tweets en 20 meses, que mostramos a continuación:
+Mediante estos dos procedimientos, contamos con todos los tweets emitidos por la cuenta, desde la fecha de su creación el 15 de abril de 2016 hasta el 31 de diciembre de 2017. Es decir que contamos con el censo de los tweets y no con una muestra. Son 3986 tweets en 20 meses, que mostramos a continuación:
 
 ```{r message=FALSE}
 library(readr)
@@ -121,7 +122,7 @@ evovar_tf <- evovar_t %>%
 str(evovar_tf)
 ```
 
-Ahora sí podemos observar las palabras más utilizadas por Evo Morales:
+Ahora sí podemos observar las palabras más utilizadas por @evoespueblo:
 ```{r}
 freq2 <- evovar_tf %>%
         count(word, sort = TRUE)
@@ -136,9 +137,9 @@ head(freq2, n = 30) %>%
 
 ## Análisis de datos
 
-El análisis de sentimiento nos permite aproximarnos a la intención emocional de los tweets que lanza el presidente Evo Morales. Este tipo de anålisis puede basarse en el análisis de palabras o relaciones de palabras (n-gramas) y se pueden evaluar diferentes escalas de sentimiento (binarias, ponderadas, etc.). Aquí elegimos el nivel del unigrama y la escala binaria, como una primera aproximación expedita. Ahora bien, existen diversos métodos para evaluar los *sentiments* en los textos, desde la anotación manual hasta el uso de *machine learning*, pero aquí utilizaremos el método basado en diccionario (Silge y Robinson 2017). Este método consite en utilizar un diccionario en formato *clave:valor* para evaluar cada palabra. Se considera al tweet como una combinación de palabras individuales que tienen una carga emocional y la proporción de esas palabras nos da el sentimiento general del tweet, como posteriormente reflejaremos en un indice de sentimiento.  
+El análisis de sentimiento nos permite aproximarnos a la intención emocional de los tweets que lanza el presidente Evo Morales. Este tipo de anålisis puede basarse en el análisis de palabras o relaciones de palabras (n-gramas) y se pueden evaluar diferentes escalas de sentimiento (binarias, ponderadas, etc.). Aquí elegimos el enfoque de "bolsa de palabras", el nivel del unigrama y la escala binaria, como una primera aproximación expedita. Ahora bien, existen diversos métodos para evaluar los *sentiments* en los textos, desde la anotación manual hasta el uso de *machine learning*, pero aquí utilizaremos el método basado en diccionario (Silge y Robinson 2017). Este método consite en utilizar un diccionario en formato *clave:valor* para evaluar cada palabra. Se considera al tweet como una combinación de palabras individuales que tienen una carga emocional y la proporción de esas palabras nos da el sentimiento general del tweet, como posteriormente reflejaremos en un indice de sentimiento.  
 
-Los diccionarios para análisis de sentimiento en español son escasos y poco desarrollados. Después de una extensa búsqueda pudimos encontrar el diccionario [iSol](http://timm.ujaen.es/recursos/isol/) que está formado por 8135 palabras, 2.509 positivas y 5.626 negativas, dejando a un lado las palabras emocionalmente neutras. Este diccionario a su vez está basado en otro diccionario en inglés bastante testeado como es el de [Bing Liu](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), siendo una traducción especializada y mejorada.  
+Los diccionarios para análisis de sentimiento en español son escasos y poco desarrollados. Después de una larga búsqueda pudimos encontrar el diccionario [iSol](http://timm.ujaen.es/recursos/isol/) que está formado por 8135 palabras, 2.509 positivas y 5.626 negativas, dejando a un lado las palabras emocionalmente neutras. Este diccionario a su vez está basado en otro diccionario en inglés bastante testeado como es el de [Bing Liu](https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html), siendo una traducción especializada y mejorada.  
 
 ```{r message=FALSE}
 #cargamos y adecuamos el diccionario al formato requerido
@@ -170,7 +171,7 @@ por_w
 
 El diccionario clasificó el 11% de las palabras. Lo ideal es que el diccionario se aproxime al 20% de las palabras siguiendo la ley de Zipf[^7], por lo que efectuaremos unas modificaciones.  
 
-Al revisar el diccionario encontramos tres problemas. Primero, si bien contiene muchas palabras con clara carga sentimental, en ocasiones no contiene todas sus flexiones. Segundo, dado que es un diccionaario general, no captura algunas particularidades del discurso político del presidente, particularmene su discurso nacionalista. Tercero, existen palabras polarizadas que sirven para indicar el sentimiento frente a un producto o servicio, pero no en temas políticos. Para el primer problema añadiremos flexiones basadas ya en las palabras existentes en el diccionario, para el segundo añadiremos las palabras politizadas más utilizadas, evaluando su polaridad en un intento de un diccionario político inicial, y para el tercero retiraremos las palabras no apropiadas:
+Al revisar el diccionario encontramos tres problemas. Primero, si bien contiene muchas palabras con clara carga sentimental, en ocasiones no contiene todas sus flexiones. Segundo, dado que es un diccionaario general, no captura algunas particularidades del discurso político del presidente, particularmene su discurso nacionalista. Tercero, existen palabras polarizadas que sirven para indicar el sentimiento frente a un producto o servicio, pero no tienen efectividad en temas políticos. Para el primer problema añadiremos flexiones basadas ya en las palabras existentes en el diccionario, para el segundo añadiremos las palabras politizadas más utilizadas, evaluando su polaridad en un intento de un diccionario político inicial, y para el tercero retiraremos las palabras no apropiadas:
 
 ```{r message=FALSE}
 #Añadiendo flexiones y otras palabras polarizadas
@@ -359,21 +360,21 @@ summary(regneg)
 
 ## Conclusión
 
-La polaridad general de los tweets de la cuenta de Evo Morales apunta a un mayor uso de palabras negativas (57%) que positivas (43%). Aunque no es una diferencia abismal, pues en la construcción discursiva política debe haber también no solo un *ellos negativizado*, sino también un *nosotros positivizado*. En ello se pudieron observar algunos pares semánticos antagonicos, entre las palabras más usadas, como EEUU/pueblo, lucha/paz, imperio/patria. 
+La polaridad general de los tweets de la cuenta de Evo Morales apunta a un mayor uso de palabras negativas (57%) que positivas (43%). Aunque no es una diferencia abismal, pues en la construcción discursiva política debe haber también no solo un *ellos negativizado*, sino también un *nosotros positivizado*. En esta construcción se pudieron observar algunos pares semánticos antagonicos, entre las palabras más usadas, como EEUU/pueblo, lucha/paz, imperio/patria. 
 
-En la relación entre la polaridad de los tweets y la interacción, podemos encontrar una diferencia entre la recepción de los tweets positivos y los negativos. Los tweets negativos tienen una mayor interacción que los positivos, en la prueba de correlación dan un 0,15 mientras los tweets negativos un 0,02. En la prueba de regresión, los tweets por cada punto porcentual negativo reciben en promedio 21 interacciones más, con un p-valor significativo; mientras que la positividad no tiene el mismo efecto, consiguiendo 4 interacciones más pero con un p-valor no significativo. 
+En la relación entre la polaridad de los tweets y la interacción, podemos encontrar una diferencia entre la recepción de los tweets positivos y los negativos. Los tweets negativos tienen una mayor interacción que los positivos, en la prueba de correlación los tweets negativos obtienen un 0,15 mientras los positovos tan sólo 0,02. Pasando a la prueba de regresión, los tweets por cada punto porcentual negativo reciben en promedio 21 interacciones más, con un p-valor significativo; mientras que los puntos porcentuales positivos no tiene el mismo efecto, consiguiendo 4 interacciones más pero con un p-valor no significativo. 
 
-Lo anterior puede ilustrarse si nos vamos a analizar los diez tweets con mayor interacción:
+Lo anterior puede ilustrarse con el análisis de los diez tweets con mayor interacción:
 
 ```{r}
 pop_t <- evovar_sent %>%
         select(text, interact, isent_neg, isent_pos) %>%
         arrange(desc(interact))
-head(pop_t, n = 10) 
+head(pop_t, n = 10) %>% knitr::kable()
 ```
 Aquí se puede apreciar que 7 de los 10 tweets tienen una fuerta carga emocional negativa, lo cual queda representando en sus indices de negatividad. Sólo tres de los diez tweets más populares de Evo Morales son positivos. 
 
-No obstante, el coeficiente de determinación (R^2^) muestra que la variación en las interacciones solo es explicada por su negatividad al 2%. Esta situación puede ser explicada por las siguientes alternativas: (a) existen otras variables en juego, como los topicos de los tweets que influyen en la interacción, por ejemplo que sean de temas nacionales o internacionales, históricos o políticos; (b), que las audiencia internacional sea más activa que la nacional o viceversa; (c) que el diccionario que usamos aún sea muy general y no capté las polaridades semanticas del discuro particular del presidente; (d) que el unigrama no sea una unidad de análisis suficiente en este caso. 
+No obstante, el coeficiente de determinación (R^2^) muestra que la variación en las interacciones solo es explicada por su negatividad al 2%. Esta situación puede ser explicada por las siguientes alternativas: (a) existen otras variables en juego, como los topicos de los tweets que influyen en la interacción, por ejemplo que sean tweets sobre temas nacionales o internacionales, históricos o políticos, etc.; (b), que las audiencia internacional sea más activa que la nacional o viceversa; (c) que el diccionario que usamos aún sea muy general y no capté las polaridades semanticas del discuro particular del presidente; (d) que el unigrama no sea una unidad de análisis suficiente en este caso. 
 
 A pesar de esas limitaciones, este primer acercamiento nos permite mostrar (1) la potencial importancia de la variable emoción en los discursos políticos en red; (2) un método de recolección y anålisis para grandes cantidades de datos textuales en redes sociales. 
 
@@ -385,11 +386,23 @@ Jordan, Wilfredo (2017). "7 gráficos para entender la cuenta de Evo Morales en 
 
 Lopez, Tonny (2017). "Las 101 cuentas de Twitter con más seguidores en Bolivia". En: [Rimaypampa](http://www.rimaypampa.com/2017/12/las-101-cuentas-de-twitter-con-mas.html) (24/12/2017)
 
+Rogers, Richard (2013). *Digital Methods*. MIT Press.
+
 Trigo, María (2018). "Evo: El tuitero que pasó del odio al amor a las redes". En: [El Deber](http://www.eldeber.com.bo/separata/Evo-El-tuitero-que-paso-del-odio-al-amor-a-las-redes-20180108-0021.html) (09/01/2018)
 
 Silge, Julia y Robinson, David (2017). *Text Mining with R: A Tidy Approach*. O'Reilly Media
 
 Suiter, Jane (2016). "Post-truth Politics". En: *Political Insight*, vol 7, 3. Sage.  
+
+## Herramientas digitales 
+
+* R
+* rtweet
+* ggplot2
+
+## Sobre el autor
+
+Alex Ojeda Copa es sociólogo digital y analista de redes sociales. Pueden encontrarlo en [Twitter](https://twitter.com/alexrocz), [LinkedIn](https://www.linkedin.com/in/alexroc/) y [Academia.edu](https://umss.academia.edu/alexroc).
 
 ## Notas
 
@@ -397,6 +410,6 @@ Suiter, Jane (2016). "Post-truth Politics". En: *Political Insight*, vol 7, 3. S
 [^2]: En español literalmente "raspado". Es una técnica que permite la extracción de la información en la Web simulando la navegación humana. 
 [^3]: Del inglés *Application Programming Interface*. Es un programa intermedio que permite interactuar con otro sistema, mediante un lenguaje definido para el caso. Las grandes plataformas de redes sociales ponen a disposición sus APIs para los desarrolladores, aunque con limitaciones, y su uso nos permite recolectar grandes cantidades de datos. 
 [^4]: La documentación de la API de Twitter puede verse aquí https://developer.twitter.com/en/docs. 
-[^5]: En el mundo de R, los paquetes más populares para acceder a la API de Twitter son `rtweet` y `twitteR`. Estuvimos usando bastante este ultimo, pero encontramos muchas fallas, por lo que desaconsejamos su uso. El desarrollador [informa](https://github.com/geoffjentry/twitteR) que el paquete estå obsoleto.  
+[^5]: En el mundo de R, los paquetes más populares para acceder a la API de Twitter son `rtweet` y `twitteR`. Estuvimos usando bastante este ultimo, pero encontramos muchas fallas, por lo que desaconsejamos su uso. El desarrollador [informa](https://github.com/geoffjentry/twitteR) que el paquete estå obsoleto. 
 [^6]: Se encuentra en https://github.com/bpb27/twitter_scraping/blob/master/scrape.py.
 [^7]: Es una ley de potencias. En terminos sencillos esta ley empírica establece que existe una minoria de palabras (~20%) que se utilizan con mayor frecuencia (~80%), y otra mayoría de palabras (~80%) con menor frecuencia (~20%). Tiene similaridad a la distribución de Pareto. 
